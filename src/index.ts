@@ -168,6 +168,10 @@ const nativeMarketsV3: Record<string, string> = {
   'OSTD1':'3BS6iuWRYW1HCHZP1ftcur1TLNiEEhfhxXkmYpn816W4',
   'MSD1':'ErFFAyjV9iHAVJcA9AeBHAZrHNNJnjWDiZR4LvvkfACK',
   'MSPP1':'G4E59tNgqkPYWWebTKoDFEpwwtrvG7MFdLku3XX4SvB9',
+  'FM-PLG':'6GgPHefcbFu78kE9GZg3z1A9eHAaXeCPMqdjhRscFDSL',
+  'FM-NLDB':'ChJKLWcHQb4VXFmA9Q9gjLvRapkboUvWCfCfqmLsnhSw',
+  'FM-PP':'Fjcdi6CJJqvy2aSknEodKheB1dYVD9rdtZMJNjFo8Fck',
+  'FM-CO92':'3AuyQppPMFToedMm8Xf1x79CfDUzpzLDorHHQmf11Rzy',
 
 }
 
