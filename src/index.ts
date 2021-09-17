@@ -172,6 +172,16 @@ const nativeMarketsV3: Record<string, string> = {
   'FM-NLDB':'ChJKLWcHQb4VXFmA9Q9gjLvRapkboUvWCfCfqmLsnhSw',
   'FM-PP':'Fjcdi6CJJqvy2aSknEodKheB1dYVD9rdtZMJNjFo8Fck',
   'FM-CO92':'3AuyQppPMFToedMm8Xf1x79CfDUzpzLDorHHQmf11Rzy',
+  'FM-T3A':'3A1Y5StwbaT6jWo5dgBMNaZMDoQ1rfpxQyZ87Nmwjohx',
+  'FM-T3CK':'BayVbJdbJawJHvjBdTmHaX8P5EDnmLHVUAN5ZcDzZoJL',
+  'FM-T3FAB':'AP2u8YPZtwanBUnP2SJ7mqXGwqZPQx4yLWdex7CtYToW',
+  'FM-T3FTX':'8vA9cAVBrt29WaCZY3jQ99cHMF9JqnX7F8dqC25CWr5n',
+  'FM-T3PH':'D6jGFKePetKogT778PDtAqsEf75rvqH2nk5MpR3JsCNn',
+  'FM-T3SR':'5XoGYWfC8ULXkU51ozSzfS1rX24fq2MtzhJh3RuyZzNL',
+  'FM-T3SOL':'uWsNjBpSUYzF5pG2UvwTrMFwGnRecH7zBa9cuBMyfkX',
+  'FM-T3A':'Htg1p5W2yY91nM7hHk7GKTb1rAP2uZgGBxYfCWQJPfpv',
+  'FM-T3STEP':'BK5oTjFnW64Wk2fJdFbQ8e2dmB2rMUBFmAozp8FdhMwp',
+  'FM-T3RAY':'59M3seisE9pmfw2H2iiNyMNtHc2fP2PBdh659sG8Yctw',
 
 }
 
