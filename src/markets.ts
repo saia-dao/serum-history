@@ -82,5 +82,5 @@ export const nativeMarketsV3: Record<string, string> = {
     'FM-T3ATLAS':'C5UdbBXYyeDFPcNjw9zQkcWadzP6tgKoCp7YxhqGcJp1',
     'FM-T3STEP':'GCsYJjV1BYtiaGyjFgkadutaNKYYDPDP8anP95h2tbTc',
     'FM-T3RAY':'3KYW1LYzfZfBupRcuS7KjH84jCWdX1s42xvvDF3keGn2',
-    'PX5SR':'9etn4jMzfyBBZCEMdAQqd1Mop19aopJyBhMnaSG5NazZ',
+    'PX5SR':'98238GZrjECJDpowVCn1EaYtJpR7o5HMszevTFD7brEp',
 };
