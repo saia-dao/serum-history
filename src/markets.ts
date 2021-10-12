@@ -75,7 +75,7 @@ export const nativeMarketsV3: Record<string, string> = {
   "FM-CO92": "52HCo9MRuEj6sKRS9Me2UriCQvaeL4CQe7DkBSm1bW7K",
   "FM-T3CK": "HSJ8Jv8MsxxQrdspBtT4tQvTrerAynmCxSokBK7YC9UR",
   "FM-T3RAY": "3KYW1LYzfZfBupRcuS7KjH84jCWdX1s42xvvDF3keGn2",
-  "FM-T3ATLAS": "C5UdbBXYyeDFPcNjw9zQkcWadzP6tgKoCp7YxhqGcJp1",
+  "FM-T3ATL": "C5UdbBXYyeDFPcNjw9zQkcWadzP6tgKoCp7YxhqGcJp1",
   "FM-T3SOL": "98238GZrjECJDpowVCn1EaYtJpR7o5HMszevTFD7brEp",
   "FM-T3STEP": "GCsYJjV1BYtiaGyjFgkadutaNKYYDPDP8anP95h2tbTc",
   "FM-T3PH": "CL5ScWqMDcy1dvvPXE4XAcBdTYDc8x8F8www29K2xNeA",
