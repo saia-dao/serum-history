@@ -108,13 +108,13 @@ async function collectEventQueue(m: MarketConfig, r: RedisConfig) {
         const [trades, currentSeqNum] = await fetchTrades(lastSeqNum)
         storeTrades(trades)
         store.storeNumber('LASTSEQ', currentSeqNum)
-      } catch (e) {
-        notify(`collectEventQueue ${m.marketName}`)
+      } catch (err) {
+        notify(`collectEventQueue ${m.marketName} ${err}`)
       }
       await sleep({ Seconds: fetchInterval })
     }
-  } catch (e) {
-    notify(`collectEventQueue ${m.marketName}`)
+  } catch (err) {
+    notify(`collectEventQueue ${m.marketName} ${err}`)
   }
 }
 
@@ -237,7 +237,7 @@ app.get('/tv/history', async (req, res) => {
     res.send(response)
     return
   } catch (err) {
-    notify(`tv/history ${marketName}`)
+    notify(`tv/history ${marketName} ${err}`)
     const error = { s: 'error' }
     res.status(500).send(error)
   }
@@ -281,8 +281,8 @@ app.get('/trades/address/:marketPk', async (req, res) => {
     res.set('Cache-control', 'public, max-age=5')
     res.send(response)
     return
-  } catch (e) {
-    notify(`trades ${marketName}`)
+  } catch (err) {
+    notify(`trades ${marketName} ${err}`)
     const error = { s: 'error' }
     res.status(500).send(error)
   }
