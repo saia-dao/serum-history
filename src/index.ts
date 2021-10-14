@@ -17,74 +17,10 @@ import {
   FillEvent,
 } from '@blockworks-foundation/mango-client'
 import BN from 'bn.js'
+import notify from './notify'
+import LRUCache from 'lru-cache'
+
 import { nativeMarketsV3 } from './markets'
-
-async function collectEventQueue(m: MarketConfig, r: RedisConfig) {
-  const store = await createRedisStore(r, m.marketName)
-  const marketAddress = new PublicKey(m.marketPk)
-  const programKey = new PublicKey(m.programId)
-  const connection = new Connection(m.clusterUrl)
-  const market = await Market.load(
-    connection,
-    marketAddress,
-    undefined,
-    programKey
-  )
-
-  async function fetchTrades(lastSeqNum?: number): Promise<[Trade[], number]> {
-    const now = Date.now()
-    const accountInfo = await connection.getAccountInfo(
-      market['_decoded'].eventQueue
-    )
-    if (accountInfo === null) {
-      throw new Error(
-        `Event queue account for market ${m.marketName} not found`
-      )
-    }
-    const { header, events } = decodeRecentEvents(accountInfo.data, lastSeqNum)
-    const takerFills = events.filter(
-      (e) => e.eventFlags.fill && !e.eventFlags.maker
-    )
-    const trades = takerFills
-      .map((e) => market.parseFillEvent(e))
-      .map((e) => {
-        return {
-          price: e.price,
-          side: e.side === 'buy' ? TradeSide.Buy : TradeSide.Sell,
-          size: e.size,
-          ts: now,
-        }
-      })
-    /*
-    if (trades.length > 0)
-      console.log({e: events.map(e => e.eventFlags), takerFills, trades})
-    */
-    return [trades, header.seqNum]
-  }
-
-  async function storeTrades(ts: Trade[]) {
-    if (ts.length > 0) {
-      console.log(m.marketName, ts.length)
-      for (let i = 0; i < ts.length; i += 1) {
-        await store.storeTrade(ts[i])
-      }
-    }
-  }
-
-  while (true) {
-    try {
-      const lastSeqNum = await store.loadNumber('LASTSEQ')
-      const [trades, currentSeqNum] = await fetchTrades(lastSeqNum)
-      storeTrades(trades)
-      store.storeNumber('LASTSEQ', currentSeqNum)
-    } catch (err) {
-      console.error(m.marketName, err.toString())
-    }
-    await sleep({
-      Seconds: process.env.INTERVAL ? parseInt(process.env.INTERVAL) : 10,
-    })
-  }
-}
 
 const redisUrl = new URL(process.env.REDISCLOUD_URL || 'redis://localhost:6379')
 const host = redisUrl.hostname
@@ -97,6 +33,10 @@ if (redisUrl.password !== '') {
 const network = 'mainnet-beta'
 const clusterUrl =
   process.env.RPC_ENDPOINT_URL || 'https://solana-api.projectserum.com'
+const fetchInterval = process.env.INTERVAL ? parseInt(process.env.INTERVAL) : 30
+
+console.log({ clusterUrl, fetchInterval })
+
 const programIdV3 = '9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin'
 
 const symbolsByPk = Object.assign(
@@ -104,7 +44,86 @@ const symbolsByPk = Object.assign(
   ...Object.entries(nativeMarketsV3).map(([a, b]) => ({ [b]: a }))
 )
 
+async function collectEventQueue(m: MarketConfig, r: RedisConfig) {
+  try {
+    const store = await createRedisStore(r, m.marketName)
+    const marketAddress = new PublicKey(m.marketPk)
+    const programKey = new PublicKey(m.programId)
+    const connection = new Connection(m.clusterUrl)
+    const market = await Market.load(
+      connection,
+      marketAddress,
+      undefined,
+      programKey
+    )
+
+    async function fetchTrades(
+      lastSeqNum?: number
+    ): Promise<[Trade[], number]> {
+      const now = Date.now()
+      const accountInfo = await connection.getAccountInfo(
+        market['_decoded'].eventQueue
+      )
+      if (accountInfo === null) {
+        throw new Error(
+          `Event queue account for market ${m.marketName} not found`
+        )
+      }
+      const { header, events } = decodeRecentEvents(
+        accountInfo.data,
+        lastSeqNum
+      )
+      const takerFills = events.filter(
+        (e) => e.eventFlags.fill && !e.eventFlags.maker
+      )
+      const trades = takerFills
+        .map((e) => market.parseFillEvent(e))
+        .map((e) => {
+          return {
+            price: e.price,
+            side: e.side === 'buy' ? TradeSide.Buy : TradeSide.Sell,
+            size: e.size,
+            ts: now,
+          }
+        })
+      /*
+    if (trades.length > 0)
+      console.log({e: events.map(e => e.eventFlags), takerFills, trades})
+    */
+      return [trades, header.seqNum]
+    }
+
+    async function storeTrades(ts: Trade[]) {
+      if (ts.length > 0) {
+        console.log(m.marketName, ts.length)
+        for (let i = 0; i < ts.length; i += 1) {
+          await store.storeTrade(ts[i])
+        }
+      }
+    }
+
+    while (true) {
+      try {
+        const lastSeqNum = await store.loadNumber('LASTSEQ')
+        const [trades, currentSeqNum] = await fetchTrades(lastSeqNum)
+        storeTrades(trades)
+        store.storeNumber('LASTSEQ', currentSeqNum)
+      } catch (e) {
+        notify(`collectEventQueue ${m.marketName} ${e.toString()}`)
+      }
+      await sleep({ Seconds: fetchInterval })
+    }
+  } catch (e) {
+    notify(`collectEventQueue ${m.marketName} ${e.toString()}`)
+  }
+}
+
 function collectMarketData(programId: string, markets: Record<string, string>) {
+  if (process.env.ROLE === 'web') {
+    console.warn('ROLE=web detected. Not collecting market data.')
+    return
+  }
+
   Object.entries(markets).forEach((e) => {
     const [marketName, marketPk] = e
     const marketConfig = {
@@ -120,9 +139,16 @@ function collectMarketData(programId: string, markets: Record<string, string>) {
 collectMarketData(programIdV3, nativeMarketsV3)
 
 const groupConfig = Config.ids().getGroup('mainnet', 'mainnet.1') as GroupConfig
-const max_conn = parseInt(process.env.REDIS_MAX_CONN || '') || 200
-const redisConfig = { host, port, password, db: 0, max_conn }
-const pool = new TedisPool(redisConfig)
+
+const conn = new Tedis({
+  host,
+  port,
+  password,
+})
+
+const cache = new LRUCache<string, Trade[]>(
+  parseInt(process.env.CACHE_LIMIT ?? '500')
+)
 
 const app = express()
 app.use(cors())
@@ -187,36 +213,31 @@ app.get('/tv/history', async (req, res) => {
 
   // respond
   try {
-    const conn = await pool.getTedis()
-    try {
-      const store = new RedisStore(conn, marketName)
+    const store = new RedisStore(conn, marketName)
 
-      // snap candle boundaries to exact hours
-      from = Math.floor(from / resolution) * resolution
-      to = Math.ceil(to / resolution) * resolution
+    // snap candle boundaries to exact hours
+    from = Math.floor(from / resolution) * resolution
+    to = Math.ceil(to / resolution) * resolution
 
-      // ensure the candle is at least one period in length
-      if (from == to) {
-        to += resolution
-      }
-      const candles = await store.loadCandles(resolution, from, to)
-      const response = {
-        s: 'ok',
-        t: candles.map((c) => c.start / 1000),
-        c: candles.map((c) => c.close),
-        o: candles.map((c) => c.open),
-        h: candles.map((c) => c.high),
-        l: candles.map((c) => c.low),
-        v: candles.map((c) => c.volume),
-      }
-      res.set('Cache-control', 'public, max-age=1')
-      res.send(response)
-      return
-    } finally {
-      pool.putTedis(conn)
+    // ensure the candle is at least one period in length
+    if (from == to) {
+      to += resolution
     }
+    const candles = await store.loadCandles(resolution, from, to, cache)
+    const response = {
+      s: 'ok',
+      t: candles.map((c) => c.start / 1000),
+      c: candles.map((c) => c.close),
+      o: candles.map((c) => c.open),
+      h: candles.map((c) => c.high),
+      l: candles.map((c) => c.low),
+      v: candles.map((c) => c.volume),
+    }
+    res.set('Cache-control', 'public, max-age=1')
+    res.send(response)
+    return
   } catch (e) {
-    console.error({ req, e })
+    notify(`tv/history ${marketName} ${e.toString()}`)
     const error = { s: 'error' }
     res.status(500).send(error)
   }
@@ -234,40 +255,34 @@ app.get('/trades/address/:marketPk', async (req, res) => {
   const validPk = marketName != undefined
   if (!validPk) {
     const error = { s: 'error', validPk }
-    console.error({ marketPk, error })
     res.status(404).send(error)
     return
   }
 
   // respond
   try {
-    const conn = await pool.getTedis()
-    try {
-      const store = new RedisStore(conn, marketName)
-      const trades = await store.loadRecentTrades()
-      const response = {
-        success: true,
-        data: trades.map((t) => {
-          return {
-            market: marketName,
-            marketAddress: marketPk,
-            price: t.price,
-            size: t.size,
-            side: t.side == TradeSide.Buy ? 'buy' : 'sell',
-            time: t.ts,
-            orderId: '',
-            feeCost: 0,
-          }
-        }),
-      }
-      res.set('Cache-control', 'public, max-age=5')
-      res.send(response)
-      return
-    } finally {
-      pool.putTedis(conn)
+    const store = new RedisStore(conn, marketName)
+    const trades = await store.loadRecentTrades()
+    const response = {
+      success: true,
+      data: trades.map((t) => {
+        return {
+          market: marketName,
+          marketAddress: marketPk,
+          price: t.price,
+          size: t.size,
+          side: t.side == TradeSide.Buy ? 'buy' : 'sell',
+          time: t.ts,
+          orderId: '',
+          feeCost: 0,
+        }
+      }),
     }
+    res.set('Cache-control', 'public, max-age=5')
+    res.send(response)
+    return
   } catch (e) {
-    console.error({ req, e })
+    notify(`trades ${marketName} ${e.toString()}`)
     const error = { s: 'error' }
     res.status(500).send(error)
   }
