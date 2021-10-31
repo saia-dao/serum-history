@@ -1,6 +1,7 @@
 export const nativeMarketsV3: Record<string, string> = {
   "POLIS": "HxFLKUAmAMLz1jtT3hbvCMELwH5H9tpM2QugP8sKyfhW",
   "ATLAS": "Di66GTLsV64JgCCYGVcY21RZ173BHkjJVgPyezNN7P1K",
+  "POLIS/ATLAS": "6fk7SnxrF69fPkfMNnkjPXbxsqd8xzDfNpGWbtcdfhFX",
   "PASS": "7bPXjodb2c4ZfBPL9QxyFF2JbErB67Rdbpd41ChpDSof",
   "DOI": "AYXTVttPfhYmn3jryX5XbRjwPK2m9445mbN2iLyRD6nq",
   "HOSA": "5Erzgrw9pTjNWLeqHp2sChJq7smB7WXRQYw9wvkvA59t",
