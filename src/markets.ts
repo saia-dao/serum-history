@@ -123,8 +123,8 @@ export const nativeMarketsV3: Record<string, string> = {
   "FBLBEA/USDC": "4KtDSifTeWXehWZijMXrm7R6usPJv6DYqrjb2rM4rx3x",
   "CALEV/ATLAS": "5m1iwMhjBCCpy2oRWzL3pvpCvQU6yUcvChXLBzGYGQ2R",
   "CALEV/USDC": "2Yu6biqHfnrCKpQThuR9jwC2fJqNzZtKt9jrjo3iKkkc",
-  "AMMO/ATLAS": "QeL22q71pdXzDSj9ZEbkEMZ7PfnxD81pfX4YZpDsQoq",
-  "TOOL/ATLAS": "7kpYMW2Fjbu2vnUN783KKa4MmspguVxHWXh8xinYhmrk",
-  "FOOD/ATLAS": "262gYdLasTTDy7yiriwpNzo8re58A6EPyigF9SCETs3K",
-  "FUEL/ATLAS": "Bqhy9LVPjucLf6cimuj3gHfg9kH1J8vhgv48gBstiJXR"
+  "AMMO/ATLAS": "8qtV9oq8VcrUHZdEeCJ2bUM3uLwjrfJ9U9FGrCSvu34z",
+  "TOOL/ATLAS": "32Pr4MhSD1K4J9buESjjbSZnXWLQ5oHFgB9MhEC2hp6J",
+  "FOOD/ATLAS": "AdL6nGkPe3snPb7TEgSjaN8qCG493iYQqv4DeoCqH53F",
+  "FUEL/ATLAS": "D6rLbJLqi1VvV81ViPScgWiKYcZoTPnMiQTcrmH9X5oQ"
 }
